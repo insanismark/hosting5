@@ -1,0 +1,16 @@
+# FTP User Configuration
+# This file is copied to /etc/vsftpd/user_conf/{username}
+
+# User's home directory
+local_root=/var/www/{username}
+
+# Allow write access
+write_enable=YES
+
+# Maximum upload/download rate (0 = unlimited)
+# anon_max_rate=0
+# local_max_rate=0
+
+# Maximum number of concurrent connections
+# max_clients=10
+

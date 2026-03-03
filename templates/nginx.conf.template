@@ -1,0 +1,51 @@
+server {
+    listen 80;
+    listen [::]:80;
+    server_name {{DOMAIN}};
+
+    root {{ROOT_DIR}};
+    index index.php index.html;
+
+    access_log /var/www/{{USERNAME}}/logs/access.log;
+    error_log /var/www/{{USERNAME}}/logs/error.log;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~ \.php$ {
+        include fastcgi_params;
+        fastcgi_pass {{FASTCGI_PASS}};
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_param PATH_INFO $fastcgi_path_info;
+        
+        # PHP-FPM configuration
+        fastcgi_buffer_size 32k;
+        fastcgi_buffers 16 16k;
+        fastgi_connect_timeout 60s;
+        fastcgi_send_timeout 300s;
+        fastcgi_read_timeout 300s;
+    }
+
+    location ~ /\.ht {
+        deny all;
+    }
+
+    # Enable SSL (uncomment after certbot setup)
+    # listen 443 ssl http2;
+    # listen [::]:443 ssl http2;
+    # ssl_certificate /etc/letsencrypt/live/{{DOMAIN}}/fullchain.pem;
+    # ssl_certificate_key /etc/letsencrypt/live/{{DOMAIN}}/privkey.pem;
+    # include /etc/letsencrypt/options-ssl-nginx.conf;
+    # ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+}
+
+# HTTPS redirect (uncomment after SSL setup)
+# server {
+#     listen 80;
+#     listen [::]:80;
+#     server_name {{DOMAIN}};
+#     return 301 https://$host$request_uri;
+# }
+

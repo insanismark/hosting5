@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  php:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: {{USERNAME}}_php
+    restart: unless-stopped
+    volumes:
+      - ./site:/var/www/html:ro
+      - ./logs:/var/log/php
+    environment:
+      - PHP_DISPLAY_ERRORS=Off
+      - PHP_LOG_ERRORS=On
+      - PHP_MEMORY_LIMIT=128M
+      - PHP_MAX_EXECUTION_TIME=120
+      - PHP_UPLOAD_MAX_FILESIZE=20M
+      - PHP_POST_MAX_SIZE=20M
+    networks:
+      - hosting_net
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+    healthcheck:
+      test: ["CMD", "php-fpm", "-t"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  hosting_net:
+    external: true
+
