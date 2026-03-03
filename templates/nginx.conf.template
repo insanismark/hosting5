@@ -4,15 +4,18 @@ server {
     server_name {{DOMAIN}};
 
     root {{ROOT_DIR}};
-    index index.php index.html;
+    index index.php index.html index.htm;
 
+    # Логи
     access_log /var/www/{{USERNAME}}/logs/access.log;
     error_log /var/www/{{USERNAME}}/logs/error.log;
 
+    # Основные настройки
     location / {
         try_files $uri $uri/ /index.php?$query_string;
     }
 
+    # Обработка PHP через FastCGI
     location ~ \.php$ {
         include fastcgi_params;
         fastcgi_pass {{FASTCGI_PASS}};
@@ -20,19 +23,26 @@ server {
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
         fastcgi_param PATH_INFO $fastcgi_path_info;
         
-        # PHP-FPM configuration
+        # Настройки PHP-FPM
         fastcgi_buffer_size 32k;
         fastcgi_buffers 16 16k;
-        fastgi_connect_timeout 60s;
+        fastcgi_connect_timeout 60s;
         fastcgi_send_timeout 300s;
         fastcgi_read_timeout 300s;
     }
 
+    # Защита скрытых файлов
     location ~ /\.ht {
         deny all;
     }
 
-    # Enable SSL (uncomment after certbot setup)
+    # Статические файлы с кэшированием
+    location ~* \.(jpg|jpeg|gif|png|webp|svg|woff|woff2|ttf|eot|css|js)$ {
+        expires 30d;
+        add_header Cache-Control "public, immutable";
+    }
+
+    # SSL (раскомментировать после настройки certbot)
     # listen 443 ssl http2;
     # listen [::]:443 ssl http2;
     # ssl_certificate /etc/letsencrypt/live/{{DOMAIN}}/fullchain.pem;
@@ -41,7 +51,7 @@ server {
     # ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
 }
 
-# HTTPS redirect (uncomment after SSL setup)
+# Редирект на HTTPS (раскомментировать после настройки SSL)
 # server {
 #     listen 80;
 #     listen [::]:80;

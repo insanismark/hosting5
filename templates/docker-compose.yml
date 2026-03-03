@@ -7,9 +7,15 @@ services:
       dockerfile: Dockerfile
     container_name: {{USERNAME}}_php
     restart: unless-stopped
+    
+    # Проброс порта на хост (для Nginx fastcgi_pass)
+    ports:
+      - "{{PORT}}:9000"
+    
     volumes:
       - ./site:/var/www/html:ro
       - ./logs:/var/log/php
+    
     environment:
       - PHP_DISPLAY_ERRORS=Off
       - PHP_LOG_ERRORS=On
@@ -17,8 +23,11 @@ services:
       - PHP_MAX_EXECUTION_TIME=120
       - PHP_UPLOAD_MAX_FILESIZE=20M
       - PHP_POST_MAX_SIZE=20M
+    
     networks:
       - hosting_net
+    
+    # Ограничения ресурсов
     deploy:
       resources:
         limits:
@@ -27,6 +36,8 @@ services:
         reservations:
           cpus: '0.25'
           memory: 128M
+    
+    # Healthcheck для мониторинга
     healthcheck:
       test: ["CMD", "php-fpm", "-t"]
       interval: 30s
